@@ -23,16 +23,19 @@ zAccel= collections.deque(np.zeros(10))
 alti=  collections.deque(np.zeros(10))
 
 #number of reading coming in per line of serial
-dataCount=24
+dataCount=17
 
 #Column number which has the desired data in base-zero
-xCol=5 #x-accel
-yCol=6
-zCol=7
-altCol=10 #altitude is the 13th value in the data stream
-latCol=11
-longCol=12
-satCol=13
+xCol=4 #x-accel
+yCol=5
+zCol=6
+altCol=13 #altitude is the 13th value in the data stream
+latCol=15 
+longCol=16
+satCol=17
+
+logCount=0
+logArray=collections.deque(np.zeros(dataCount))
 
 #set graph y-axis limits, any data values outside the range will show a line going off the graph
 #y-axis limits for x,y,z acceleration Graphs
@@ -50,7 +53,7 @@ altiMax=12000
 # (!READFROMSERIAL + !READFROMFILE ) = read Nothing, GUI does nothing
 
 READFROMSERIAL=True
-READFROMFILE=False
+READFROMFILE=False  
 
 
 
@@ -80,21 +83,71 @@ filename = open("TELEM_Data2.CSV",'r')
 
 
 def my_function(i):
+    global logCount
+    global dataCount
+    global logArray
+
     if(not READFROMFILE and not READFROMSERIAL):
         return
-    #reads from serial if variable is set to True
-    if(READFROMSERIAL):
-        try:
+    DEBUG_READ=False
+    if(READFROMSERIAL and DEBUG_READ):
+        while(True):
             strSerial = conv(str(arduinoSwitchbox.readline()))
             print(strSerial)
-            strSerial=strSerial.split(",")
-        except SerialException:
-            strSerial = ''#
-            return
-        print("strSerial =", end="")
-        print(strSerial)
+            print("__-------------")
 
-        vals=strSerial
+    
+    #reads from serial if variable is set to True
+    if(READFROMSERIAL):
+            # while(logCount<dataCount):
+            #     try:
+            #         strSerial = conv(str(arduinoSwitchbox.readline()))
+            #         #strSerial=strSerial.split(",")
+            #         if(strSerial[0:2]=="\t"):
+            #             print(strSerial[2:])
+            #             strSerial=strSerial[2:]
+            #             strSerial=strSerial.split(",")
+            #             #process triples
+            #             if(logCount<12):
+            #                 if(len(strSerial)<3):
+            #                     strSerial.extend(["-"]*(3-len(strSerial)))
+            #                 logArray[logCount]=strSerial[0]
+            #                 logCount+=1
+            #                 logArray[logCount]=strSerial[1]
+            #                 logCount+=1
+            #                 logArray[logCount]=strSerial[2]
+            #                 logCount+=1
+            #             else:
+            #                 logArray[logCount]=strSerial[0]
+            #                 logCount+=1
+            #                 if(len(strSerial)>1):
+            #                     logCount=0
+            #                     logArray.fill(0)
+            #         else:
+            #             logCount=0
+            #             logArray.fill(0)
+                        
+            #     except SerialException:
+            #         strSerial = ''#
+            #         return
+            
+
+            try:
+                strSerial = conv(str(arduinoSwitchbox.readline()))
+                strSerial=strSerial.split(",")
+            except SerialException:
+                strSerial = ''#
+                print("Serial Exception------------ Returning")
+                return
+            
+            
+
+            
+
+   # print(logArray)
+    vals=strSerial
+    print(vals)
+    #vals=collections.deque(np.zeros(dataCount))
 
     #grab from file for testing, file should be in same directory
     #will only use file if READFROMFILE is True and READFROMSERIAL is False
@@ -111,8 +164,9 @@ def my_function(i):
 
     #if data line has less than the expected number of columns, add extra values until the dataCount is reached
 
-    if(len(vals)<dataCount):
-        vals.extend(["-"]*(dataCount-len(vals)))
+    # if(len(vals)<dataCount):
+    #     vals.extend(["-"]*(dataCount-len(vals)))
+
 
  
 
